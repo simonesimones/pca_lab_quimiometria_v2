@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
 st.set_page_config(
 
@@ -23,7 +27,7 @@ perfil = st.sidebar.radio(
 
 "Perfil",
 
-["Graduação","Pós-graduação"]
+["Aprendiz","Mestre"]
 
 )
 
@@ -224,11 +228,189 @@ de pré-processamento.
 
 elif modulo=="Pré-processamento":
 
-    st.header(
+    st.header("🔬 Pré-processamento")
 
-"🔬 Em desenvolvimento"
+    arquivo = st.file_uploader(
 
-)
+        "Carregue CSV ou XLSX",
+
+        type=["csv","xlsx"],
+
+        key="prep"
+
+    )
+
+    if arquivo:
+
+        if arquivo.name.endswith(".xlsx"):
+
+            dados = pd.read_excel(arquivo)
+
+        else:
+
+            dados = pd.read_csv(arquivo)
+
+        X = dados.select_dtypes(include=np.number)
+
+        metodo = st.selectbox(
+
+            "Método",
+
+            [
+
+                "Nenhum",
+
+                "Centralização",
+
+                "Autoescalamento",
+
+                "SNV"
+
+            ]
+
+        )
+
+        if metodo=="Nenhum":
+
+            Xproc = X.copy()
+
+        elif metodo=="Centralização":
+
+            Xproc = X - X.mean()
+
+        elif metodo=="Autoescalamento":
+
+            Xproc = (X - X.mean())/X.std()
+
+        elif metodo=="SNV":
+
+            Xproc = (
+
+                X.sub(
+
+                    X.mean(axis=1),
+
+                    axis=0
+
+                )
+
+            ).div(
+
+                X.std(axis=1),
+
+                axis=0
+
+            )
+
+        st.subheader(
+
+            "Dados Processados"
+
+        )
+
+        st.dataframe(
+
+            Xproc.head()
+
+        )
+
+        variavel = st.selectbox(
+
+            "Escolha uma variável",
+
+            X.columns
+
+        )
+
+        fig,ax = plt.subplots()
+
+        ax.hist(
+
+            X[variavel],
+
+            alpha=0.5,
+
+            label="Original"
+
+        )
+
+        ax.hist(
+
+            Xproc[variavel],
+
+            alpha=0.5,
+
+            label="Processado"
+
+        )
+
+        ax.legend()
+
+        st.pyplot(fig)
+
+        fig2,ax2 = plt.subplots()
+
+        ax2.boxplot(
+
+            [
+
+                X[variavel],
+
+                Xproc[variavel]
+
+            ]
+
+        )
+
+        ax2.set_xticklabels(
+
+            [
+
+                "Original",
+
+                "Processado"
+
+            ]
+
+        )
+
+        st.pyplot(fig2)
+
+        st.subheader(
+
+            "Interpretação"
+
+        )
+
+        if metodo=="Centralização":
+
+            st.info(
+
+                "Os dados foram centralizados em torno da média."
+
+            )
+
+        elif metodo=="Autoescalamento":
+
+            st.info(
+
+                "As variáveis foram padronizadas."
+
+            )
+
+        elif metodo=="SNV":
+
+            st.info(
+
+                "SNV reduz efeitos de espalhamento."
+
+            )
+
+        st.success(
+
+            "🏅 Badge desbloqueada: Mestre do Pré-processamento"
+
+        )
 
 #####################################
 
